@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
@@ -82,8 +83,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SupportMapFragment supportMapFragment;
     private LatLng startLatLng, endLatLng;
 
-//      FirebaseAuth auth;
-//      DatabaseReference databaseReference;
+      FirebaseAuth auth;
+      FirebaseUser user;
+      DatabaseReference reference,reference2;
+      String user_id,name,phone,Latitude_P,Longitude_P,Latitude_D,Longitude_D;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -93,7 +96,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         pickupbtn = (Button)findViewById(R.id.pickup_btn);
         destinationbtn = (Button)findViewById(R.id.dest_btn);
- //         auth = FirebaseAuth.getInstance();
+        //
+        auth = FirebaseAuth.getInstance();
+         user=auth.getCurrentUser();
+         user_id=user.getUid();
+         reference = FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
+         reference.addValueEventListener(new ValueEventListener() {
+             @Override
+             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                 name = dataSnapshot.child("name").getValue(String.class);
+                 phone = dataSnapshot.child("phone").getValue(String.class);
+             }
+
+             @Override
+             public void onCancelled(@NonNull DatabaseError databaseError) {
+
+             }
+         });
+         reference2= FirebaseDatabase.getInstance().getReference().child("Location");
+        Locate location_object=new Locate(user_id,"0.0","0.0","0.0","0.0");
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        reference2.child(firebaseUser.getUid()).setValue(location_object).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Location saved", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Location could not be saved", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+
+        //
 
         locationCallback = new LocationCallback(){
             @Override
@@ -243,6 +280,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double lat = Double.parseDouble(bundle.get("latitude").toString());
                 double lng = Double.parseDouble(bundle.get("longitude").toString());
                 startLatLng = new LatLng(lat, lng);
+//                Latitude_P = Double.toString(lat);
+//                Longitude_P= Double.toString(lng);
+//                Locate location_object1=new Locate(user_id,Latitude_P,Longitude_P,"3.5","0.0");
+//                FirebaseUser firebaseUser = auth.getCurrentUser();
+//                reference2.child(firebaseUser.getUid()).setValue(location_object1).addOnCompleteListener(new OnCompleteListener<Void>()
+//                {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task)
+//                    {
+//                        if (task.isSuccessful()) {
+//                            Toast.makeText(getApplicationContext(), "Location saved", Toast.LENGTH_LONG).show();
+//                        } else {
+//                            Toast.makeText(getApplicationContext(), "Location could not be saved", Toast.LENGTH_LONG).show();
+//                        }
+//
+//                    }
+//                });
+
+
                 pickupbtn.setText(name);
 
                 if (currentMarker == null)

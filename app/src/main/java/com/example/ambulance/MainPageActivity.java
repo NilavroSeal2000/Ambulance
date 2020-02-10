@@ -164,7 +164,8 @@ public class MainPageActivity extends AppCompatActivity  implements NavigationVi
             {
                 auth.signOut();
                 finish();
-                Intent myintent = new Intent(MainPageActivity.this,MainActivity.class);
+                //Intent myintent = new Intent(MainPageActivity.this,MainActivity.class);
+                Intent myintent = new Intent(MainPageActivity.this,SignInActivity.class);
                 startActivity(myintent);
                 finish();
             }
