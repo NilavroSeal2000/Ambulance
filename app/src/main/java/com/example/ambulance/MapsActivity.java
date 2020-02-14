@@ -138,6 +138,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 currentLocation = locationResult.getLastLocation();
                 Log.d("Location : ", currentLocation.getLatitude() + "  " + currentLocation.getLongitude());
+                reference2= FirebaseDatabase.getInstance().getReference().child("Location");
+                Locate location_object=new Locate(user_id,Double.toString(currentLocation.getLatitude()),Double.toString(currentLocation.getLongitude()),"0.0","0.0");
+                FirebaseUser firebaseUser = auth.getCurrentUser();
+                reference2.child(firebaseUser.getUid()).setValue(location_object).addOnCompleteListener(new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Location saved", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Location could not be saved", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                });
                 supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
                 supportMapFragment.getMapAsync(MapsActivity.this);
             }
